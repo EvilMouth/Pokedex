@@ -1,6 +1,8 @@
 # Pokedex
 
-A new Flutter project.
+A small demo application written by Flutter.
+
+![](./previews/screenshot.png)
 
 ## Getting Started
 
