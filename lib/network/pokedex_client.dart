@@ -16,7 +16,13 @@ class PokedexClient implements PokedexService {
 
   Future<List<Pokemon>> fetchPokemonList(
       {int limit = 20, int offset = 0}) async {
-    final response = await _dio.get('pokemon');
+    final response = await _dio.get(
+      'pokemon',
+      queryParameters: {
+        'limit': limit,
+        'offset': offset,
+      },
+    );
     final data = response.data;
     final pokemonResponse = PokemonResponse.fromJson(data);
     return pokemonResponse.results;

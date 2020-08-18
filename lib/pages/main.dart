@@ -43,18 +43,27 @@ class _MainBody extends StatelessWidget {
   _buildPokemonList(BuildContext context) {
     final pokemonList = context.select<MainViewModel, List<Pokemon>>(
         (viewModel) => viewModel.pokemonList);
-    return GridView.builder(
-      padding: const EdgeInsets.all(8.0),
-      itemCount: pokemonList.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 4.0,
-        crossAxisSpacing: 4.0,
-        childAspectRatio: 0.86,
-      ),
-      itemBuilder: (context, index) {
-        return _buildPokemonItem(context, pokemonList[index]);
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+          // load more
+          context.read<MainViewModel>().fetchPokemonListMore();
+        }
+        return false;
       },
+      child: GridView.builder(
+        padding: const EdgeInsets.all(8.0),
+        itemCount: pokemonList.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 4.0,
+          crossAxisSpacing: 4.0,
+          childAspectRatio: 0.86,
+        ),
+        itemBuilder: (context, index) {
+          return _buildPokemonItem(context, pokemonList[index]);
+        },
+      ),
     );
   }
 
@@ -98,21 +107,31 @@ class _MainBody extends StatelessWidget {
 }
 
 class MainViewModel with ChangeNotifier {
-  bool _loading = true;
+  static const int PAGE_SIZE = 20;
+
+  bool _loading = false;
   bool get loading => _loading;
+  int _page = 0;
   List<Pokemon> _pokemonList = [];
   List<Pokemon> get pokemonList => _pokemonList;
 
   MainViewModel() {
-    fetchPokemonList(offset: 0);
+    _fetchPokemonList(page: _page = 0);
   }
 
-  fetchPokemonList({int offset = 0}) async {
+  fetchPokemonListMore() {
+    if (loading) return;
+    _fetchPokemonList(page: ++_page);
+  }
+
+  _fetchPokemonList({int page = 0}) async {
+    if (loading) return;
     markLoading(true);
     final pokemonList = await PokedexClient.instance.fetchPokemonList(
-      offset: offset,
+      limit: PAGE_SIZE,
+      offset: page * PAGE_SIZE,
     );
-    updatePokemonList(pokemonList);
+    updatePokemonList(page, pokemonList);
     markLoading(false);
   }
 
@@ -121,8 +140,12 @@ class MainViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  updatePokemonList(List<Pokemon> pokemonList) {
-    _pokemonList = pokemonList;
+  updatePokemonList(int page, List<Pokemon> pokemonList) {
+    if (page == 0) {
+      _pokemonList = pokemonList;
+    } else {
+      _pokemonList += pokemonList;
+    }
     notifyListeners();
   }
 }
