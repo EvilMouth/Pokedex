@@ -4,6 +4,7 @@ import 'package:Pokedex/constants/strings.dart';
 import 'package:Pokedex/models/pokemon.dart';
 import 'package:Pokedex/network/pokedex_client.dart';
 import 'package:Pokedex/utils/pokemon_type.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -126,11 +127,18 @@ class _DetailPokemonHeaderState extends State<_DetailPokemonHeader> {
                     padding: const EdgeInsets.all(20.0),
                     child: Hero(
                       tag: 'pokemon_${viewModel.pokemon.name}_imageUrl',
-                      child: Image.network(
-                        viewModel.pokemon.imageUrl,
+                      child: CachedNetworkImage(
+                        imageUrl: viewModel.pokemon.imageUrl,
                         width: 190.0,
                         height: 190.0,
-                      )..listen(callback: (color) => _updateCardColor(color)),
+                        imageBuilder: (context, imageProvider) => Image(
+                          image: imageProvider,
+                          width: 190.0,
+                          height: 190.0,
+                        )..listen(
+                            callback: (color) => _updateCardColor(color),
+                          ),
+                      ),
                     ),
                   ),
                 ),

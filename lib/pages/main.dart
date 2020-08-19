@@ -3,6 +3,7 @@ import 'package:Pokedex/base/view_model.dart';
 import 'package:Pokedex/constants/strings.dart';
 import 'package:Pokedex/models/pokemon.dart';
 import 'package:Pokedex/network/pokedex_client.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -105,13 +106,18 @@ class _PokenmonItemState extends State<_PokenmonItem> {
               padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 15.0),
               child: Hero(
                 tag: 'pokemon_${widget.pokemon.name}_imageUrl',
-                child: Image.network(
-                  widget.pokemon.imageUrl,
+                child: CachedNetworkImage(
+                  imageUrl: widget.pokemon.imageUrl,
                   width: 120.0,
                   height: 120.0,
-                )..listen(
-                    callback: (color) => _updateCardColor(color),
-                  ),
+                  imageBuilder: (context, imageProvider) => Image(
+                    image: imageProvider,
+                    width: 120.0,
+                    height: 120.0,
+                  )..listen(
+                      callback: (color) => _updateCardColor(color),
+                    ),
+                ),
               ),
             ),
             Hero(
