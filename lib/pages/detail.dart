@@ -172,7 +172,7 @@ class _DetailPokemonInfo extends StatelessWidget {
                             ),
                             SizedBox(height: 10.0),
                             Text(
-                              'Weight',
+                              MyStrings.weight,
                               style: const TextStyle(
                                 color: Colors.white54,
                               ),
@@ -193,7 +193,7 @@ class _DetailPokemonInfo extends StatelessWidget {
                             ),
                             SizedBox(height: 10.0),
                             Text(
-                              'Height',
+                              MyStrings.height,
                               style: const TextStyle(
                                 color: Colors.white54,
                               ),
@@ -243,8 +243,73 @@ class _DetailPokemonStats extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            SizedBox(height: 16.0),
+            _buildPokemonStatsBar(
+              text: MyStrings.hp,
+              color: Colors.red,
+              progress: viewModel.pokemonInfo.hp / PokemonInfo.maxHp,
+            ),
+            SizedBox(height: 16.0),
+            _buildPokemonStatsBar(
+              text: MyStrings.atk,
+              color: Colors.yellow,
+              progress: viewModel.pokemonInfo.attack / PokemonInfo.maxAttack,
+            ),
+            SizedBox(height: 16.0),
+            _buildPokemonStatsBar(
+              text: MyStrings.def,
+              color: Colors.blue,
+              progress: viewModel.pokemonInfo.defense / PokemonInfo.maxDefense,
+            ),
+            SizedBox(height: 16.0),
+            _buildPokemonStatsBar(
+              text: MyStrings.spd,
+              color: Colors.blue[100],
+              progress: viewModel.pokemonInfo.speed / PokemonInfo.maxSpeed,
+            ),
+            SizedBox(height: 16.0),
+            _buildPokemonStatsBar(
+              text: MyStrings.exp,
+              color: Colors.green,
+              progress: viewModel.pokemonInfo.experience / PokemonInfo.maxExp,
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  // todo custom
+  _buildPokemonStatsBar({String text, Color color, double progress}) {
+    return Container(
+      padding: const EdgeInsets.only(
+        left: 32.0,
+        right: 32.0,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 35.0, //fixme
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.only(left: 32.0),
+              child: LinearProgressIndicator(
+                value: progress,
+                backgroundColor: Colors.white,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+                minHeight: 18.0,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
