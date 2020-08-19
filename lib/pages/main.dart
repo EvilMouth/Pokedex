@@ -1,3 +1,4 @@
+import 'package:Pokedex/base/view_model.dart';
 import 'package:Pokedex/constants/strings.dart';
 import 'package:Pokedex/models/pokemon.dart';
 import 'package:Pokedex/network/pokedex_client.dart';
@@ -106,11 +107,9 @@ class _MainBody extends StatelessWidget {
   }
 }
 
-class MainViewModel with ChangeNotifier {
+class MainViewModel extends BaseViewModelWithLoadingState {
   static const int PAGE_SIZE = 20;
 
-  bool _loading = false;
-  bool get loading => _loading;
   int _page = 0;
   List<Pokemon> _pokemonList = [];
   List<Pokemon> get pokemonList => _pokemonList;
@@ -133,11 +132,6 @@ class MainViewModel with ChangeNotifier {
     );
     updatePokemonList(page, pokemonList);
     markLoading(false);
-  }
-
-  markLoading(bool loading) {
-    _loading = loading;
-    notifyListeners();
   }
 
   updatePokemonList(int page, List<Pokemon> pokemonList) {

@@ -2,7 +2,10 @@ import 'package:Pokedex/models/pokemon.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
-abstract class PokedexService {}
+abstract class PokedexService {
+  Future<List<Pokemon>> fetchPokemonList({int limit, int offset});
+  Future<PokemonInfo> fetchPokemonInfo({String name});
+}
 
 class PokedexClient implements PokedexService {
   static PokedexClient instance = PokedexClient();
@@ -14,6 +17,7 @@ class PokedexClient implements PokedexService {
       responseBody: true,
     ));
 
+  @override
   Future<List<Pokemon>> fetchPokemonList(
       {int limit = 20, int offset = 0}) async {
     final response = await _dio.get(
@@ -28,7 +32,11 @@ class PokedexClient implements PokedexService {
     return pokemonResponse.results;
   }
 
-  dynamic fetchPokemonInfo({@required String name}) async {
+  @override
+  Future<PokemonInfo> fetchPokemonInfo({@required String name}) async {
     final response = await _dio.get('pokemon/$name');
+    final data = response.data;
+    final pokemonInfo = PokemonInfo.fromJson(data);
+    return pokemonInfo;
   }
 }
