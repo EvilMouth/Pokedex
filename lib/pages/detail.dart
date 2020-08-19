@@ -232,50 +232,56 @@ class _DetailPokemonStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<DetailViewModel>(
-      builder: (context, viewModel, _) => Container(
-        child: Column(
-          children: [
-            Text(
-              'Base Stats',
-              style: const TextStyle(
-                fontSize: 21.0,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+      builder: (context, viewModel, _) => viewModel.pokemonInfo == null
+          ? Container()
+          : Container(
+              child: Column(
+                children: [
+                  Text(
+                    'Base Stats',
+                    style: const TextStyle(
+                      fontSize: 21.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 16.0),
+                  _buildPokemonStatsBar(
+                    text: MyStrings.hp,
+                    color: Colors.red,
+                    progress: viewModel.pokemonInfo.hp / PokemonInfo.maxHp,
+                  ),
+                  SizedBox(height: 16.0),
+                  _buildPokemonStatsBar(
+                    text: MyStrings.atk,
+                    color: Colors.yellow,
+                    progress:
+                        viewModel.pokemonInfo.attack / PokemonInfo.maxAttack,
+                  ),
+                  SizedBox(height: 16.0),
+                  _buildPokemonStatsBar(
+                    text: MyStrings.def,
+                    color: Colors.blue,
+                    progress:
+                        viewModel.pokemonInfo.defense / PokemonInfo.maxDefense,
+                  ),
+                  SizedBox(height: 16.0),
+                  _buildPokemonStatsBar(
+                    text: MyStrings.spd,
+                    color: Colors.blue[100],
+                    progress:
+                        viewModel.pokemonInfo.speed / PokemonInfo.maxSpeed,
+                  ),
+                  SizedBox(height: 16.0),
+                  _buildPokemonStatsBar(
+                    text: MyStrings.exp,
+                    color: Colors.green,
+                    progress:
+                        viewModel.pokemonInfo.experience / PokemonInfo.maxExp,
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 16.0),
-            _buildPokemonStatsBar(
-              text: MyStrings.hp,
-              color: Colors.red,
-              progress: viewModel.pokemonInfo.hp / PokemonInfo.maxHp,
-            ),
-            SizedBox(height: 16.0),
-            _buildPokemonStatsBar(
-              text: MyStrings.atk,
-              color: Colors.yellow,
-              progress: viewModel.pokemonInfo.attack / PokemonInfo.maxAttack,
-            ),
-            SizedBox(height: 16.0),
-            _buildPokemonStatsBar(
-              text: MyStrings.def,
-              color: Colors.blue,
-              progress: viewModel.pokemonInfo.defense / PokemonInfo.maxDefense,
-            ),
-            SizedBox(height: 16.0),
-            _buildPokemonStatsBar(
-              text: MyStrings.spd,
-              color: Colors.blue[100],
-              progress: viewModel.pokemonInfo.speed / PokemonInfo.maxSpeed,
-            ),
-            SizedBox(height: 16.0),
-            _buildPokemonStatsBar(
-              text: MyStrings.exp,
-              color: Colors.green,
-              progress: viewModel.pokemonInfo.experience / PokemonInfo.maxExp,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
