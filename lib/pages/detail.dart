@@ -119,6 +119,8 @@ class _DetailPokemonHeader extends StatelessWidget {
           Hero(
             flightShuttleBuilder: (_, __, ___, ____, to) => DefaultTextStyle(
               style: DefaultTextStyle.of(to).style,
+              softWrap: false,
+              overflow: TextOverflow.visible,
               child: to.widget,
             ),
             tag: 'pokemon_${viewModel.pokemon.name}_name',
