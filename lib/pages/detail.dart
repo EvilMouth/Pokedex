@@ -309,11 +309,14 @@ class _DetailPokemonStats extends StatelessWidget {
           Expanded(
             child: Container(
               padding: const EdgeInsets.only(left: 32.0),
-              child: LinearProgressIndicator(
-                value: progress,
-                backgroundColor: Colors.white,
-                valueColor: AlwaysStoppedAnimation<Color>(color),
-                minHeight: 18.0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(9.0),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: Colors.white,
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                  minHeight: 18.0,
+                ),
               ),
             ),
           ),
