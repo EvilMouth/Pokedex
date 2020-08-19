@@ -1,3 +1,4 @@
+import 'package:Pokedex/extensions/palette_image.dart';
 import 'package:Pokedex/base/view_model.dart';
 import 'package:Pokedex/constants/strings.dart';
 import 'package:Pokedex/models/pokemon.dart';
@@ -62,37 +63,61 @@ class _MainBody extends StatelessWidget {
           childAspectRatio: 0.86,
         ),
         itemBuilder: (context, index) {
-          return _buildPokemonItem(context, pokemonList[index]);
+          return _PokenmonItem(pokemon: pokemonList[index]);
         },
       ),
     );
   }
+}
 
-  _buildPokemonItem(BuildContext context, Pokemon pokemon) {
+class _PokenmonItem extends StatefulWidget {
+  _PokenmonItem({Key key, this.pokemon}) : super(key: key);
+
+  final Pokemon pokemon;
+
+  @override
+  _PokenmonItemState createState() => _PokenmonItemState();
+}
+
+class _PokenmonItemState extends State<_PokenmonItem> {
+  Color _cardColor = Colors.white;
+
+  _updateCardColor(Color color) {
+    if (mounted) {
+      setState(() {
+        _cardColor = color;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => DetailPage(pokemon: pokemon)));
+            builder: (context) => DetailPage(pokemon: widget.pokemon)));
       },
       child: Card(
-        color: Colors.blue,
+        color: _cardColor,
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 15.0),
               child: Hero(
-                tag: 'pokemon_${pokemon.name}_imageUrl',
+                tag: 'pokemon_${widget.pokemon.name}_imageUrl',
                 child: Image.network(
-                  pokemon.imageUrl,
+                  widget.pokemon.imageUrl,
                   width: 120.0,
                   height: 120.0,
-                ),
+                )..listen(
+                    callback: (color) => _updateCardColor(color),
+                  ),
               ),
             ),
             Hero(
-              tag: 'pokemon_${pokemon.name}_name',
+              tag: 'pokemon_${widget.pokemon.name}_name',
               child: Text(
-                pokemon.name,
+                widget.pokemon.name,
                 style: TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,

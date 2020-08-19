@@ -1,3 +1,4 @@
+import 'package:Pokedex/extensions/palette_image.dart';
 import 'package:Pokedex/base/view_model.dart';
 import 'package:Pokedex/constants/strings.dart';
 import 'package:Pokedex/models/pokemon.dart';
@@ -45,7 +46,34 @@ class DetailPage extends StatelessWidget {
   }
 }
 
-class _DetailPokemonHeader extends StatelessWidget {
+class _DetailPokemonHeader extends StatefulWidget {
+  @override
+  State<_DetailPokemonHeader> createState() => _DetailPokemonHeaderState();
+}
+
+class _DetailPokemonHeaderState extends State<_DetailPokemonHeader> {
+  Decoration _cardBoxDecoration = BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.only(
+      bottomLeft: Radius.circular(50.0),
+      bottomRight: Radius.circular(50.0),
+    ),
+  );
+
+  _updateCardColor(Color color) {
+    if (mounted) {
+      setState(() {
+        _cardBoxDecoration = BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(50.0),
+            bottomRight: Radius.circular(50.0),
+          ),
+        );
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<DetailViewModel>(
@@ -53,13 +81,7 @@ class _DetailPokemonHeader extends StatelessWidget {
         children: [
           Container(
             height: 285.0,
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(50.0),
-                bottomRight: Radius.circular(50.0),
-              ),
-            ),
+            decoration: _cardBoxDecoration,
             child: Stack(
               children: [
                 Column(
@@ -108,7 +130,7 @@ class _DetailPokemonHeader extends StatelessWidget {
                         viewModel.pokemon.imageUrl,
                         width: 190.0,
                         height: 190.0,
-                      ),
+                      )..listen(callback: (color) => _updateCardColor(color)),
                     ),
                   ),
                 ),
