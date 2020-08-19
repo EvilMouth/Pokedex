@@ -80,7 +80,7 @@ class _PokenmonItem extends StatefulWidget {
 }
 
 class _PokenmonItemState extends State<_PokenmonItem> {
-  Color _cardColor = Colors.white;
+  Color _cardColor = Colors.grey;
 
   _updateCardColor(Color color) {
     if (mounted) {

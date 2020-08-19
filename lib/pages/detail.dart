@@ -53,7 +53,7 @@ class _DetailPokemonHeader extends StatefulWidget {
 
 class _DetailPokemonHeaderState extends State<_DetailPokemonHeader> {
   Decoration _cardBoxDecoration = BoxDecoration(
-    color: Colors.white,
+    color: Colors.grey,
     borderRadius: BorderRadius.only(
       bottomLeft: Radius.circular(50.0),
       bottomRight: Radius.circular(50.0),
