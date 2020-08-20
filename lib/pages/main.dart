@@ -106,18 +106,13 @@ class _PokenmonItemState extends State<_PokenmonItem> {
               padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 15.0),
               child: Hero(
                 tag: 'pokemon_${widget.pokemon.name}_imageUrl',
-                child: CachedNetworkImage(
-                  imageUrl: widget.pokemon.imageUrl,
+                child: Image(
+                  image: CachedNetworkImageProvider(widget.pokemon.imageUrl),
                   width: 120.0,
                   height: 120.0,
-                  imageBuilder: (context, imageProvider) => Image(
-                    image: imageProvider,
-                    width: 120.0,
-                    height: 120.0,
-                  )..listen(
-                      callback: (color) => _updateCardColor(color),
-                    ),
-                ),
+                )..listen(
+                    callback: (color) => _updateCardColor(color),
+                  ),
               ),
             ),
             Hero(

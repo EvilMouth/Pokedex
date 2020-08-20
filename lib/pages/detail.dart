@@ -127,18 +127,14 @@ class _DetailPokemonHeaderState extends State<_DetailPokemonHeader> {
                     padding: const EdgeInsets.all(20.0),
                     child: Hero(
                       tag: 'pokemon_${viewModel.pokemon.name}_imageUrl',
-                      child: CachedNetworkImage(
-                        imageUrl: viewModel.pokemon.imageUrl,
+                      child: Image(
+                        image: CachedNetworkImageProvider(
+                            viewModel.pokemon.imageUrl),
                         width: 190.0,
                         height: 190.0,
-                        imageBuilder: (context, imageProvider) => Image(
-                          image: imageProvider,
-                          width: 190.0,
-                          height: 190.0,
-                        )..listen(
-                            callback: (color) => _updateCardColor(color),
-                          ),
-                      ),
+                      )..listen(
+                          callback: (color) => _updateCardColor(color),
+                        ),
                     ),
                   ),
                 ),
