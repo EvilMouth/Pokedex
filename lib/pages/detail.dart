@@ -1,6 +1,7 @@
 import 'package:Pokedex/extensions/palette_image.dart';
 import 'package:Pokedex/base/view_model.dart';
 import 'package:Pokedex/constants/strings.dart';
+import 'package:Pokedex/main.dart';
 import 'package:Pokedex/models/pokemon.dart';
 import 'package:Pokedex/network/pokedex_client.dart';
 import 'package:Pokedex/utils/pokemon_type.dart';
@@ -47,34 +48,7 @@ class DetailPage extends StatelessWidget {
   }
 }
 
-class _DetailPokemonHeader extends StatefulWidget {
-  @override
-  State<_DetailPokemonHeader> createState() => _DetailPokemonHeaderState();
-}
-
-class _DetailPokemonHeaderState extends State<_DetailPokemonHeader> {
-  Decoration _cardBoxDecoration = BoxDecoration(
-    color: Colors.grey,
-    borderRadius: BorderRadius.only(
-      bottomLeft: Radius.circular(50.0),
-      bottomRight: Radius.circular(50.0),
-    ),
-  );
-
-  _updateCardColor(Color color) {
-    if (mounted) {
-      setState(() {
-        _cardBoxDecoration = BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(50.0),
-            bottomRight: Radius.circular(50.0),
-          ),
-        );
-      });
-    }
-  }
-
+class _DetailPokemonHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<DetailViewModel>(
@@ -82,7 +56,13 @@ class _DetailPokemonHeaderState extends State<_DetailPokemonHeader> {
         children: [
           Container(
             height: 285.0,
-            decoration: _cardBoxDecoration,
+            decoration: BoxDecoration(
+              color: viewModel.pokemon.color ?? Colors.grey,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(50.0),
+                bottomRight: Radius.circular(50.0),
+              ),
+            ),
             child: Stack(
               children: [
                 Column(
@@ -132,9 +112,7 @@ class _DetailPokemonHeaderState extends State<_DetailPokemonHeader> {
                             viewModel.pokemon.imageUrl),
                         width: 190.0,
                         height: 190.0,
-                      )..listen(
-                          callback: (color) => _updateCardColor(color),
-                        ),
+                      ),
                     ),
                   ),
                 ),

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -9,6 +10,9 @@ part 'pokemon.g.dart';
 class Pokemon {
   final String name;
   final String url;
+
+  /// pokemon palette color
+  Color color = null;
 
   String get imageUrl {
     final split = url.split("/");

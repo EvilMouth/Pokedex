@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 extension PaletteImageListener on Image {
-  listen({Function(Color color) callback}) async {
+  listen({@required Function(Color color) callback}) async {
     PaletteGenerator paletteGenerator =
         await PaletteGenerator.fromImageProvider(
       image,
@@ -12,6 +12,14 @@ extension PaletteImageListener on Image {
     );
     if (paletteGenerator != null && paletteGenerator.colors.isNotEmpty) {
       callback?.call(paletteGenerator.colors.first);
+    }
+  }
+
+  listenIf(
+      {@required bool Function(Image) check,
+      @required Function(Color color) callback}) {
+    if (check(this)) {
+      this.listen(callback: callback);
     }
   }
 }

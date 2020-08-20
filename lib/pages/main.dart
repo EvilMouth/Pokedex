@@ -32,7 +32,7 @@ class _MainBody extends StatelessWidget {
         children: [
           _buildPokemonList(context),
           Center(
-            // show progress if loading
+            // just observe loading state by using select
             child: context.select<MainViewModel, bool>(
                     (viewModel) => viewModel.loading)
                 ? CircularProgressIndicator()
@@ -44,85 +44,86 @@ class _MainBody extends StatelessWidget {
   }
 
   _buildPokemonList(BuildContext context) {
-    final pokemonList = context.select<MainViewModel, List<Pokemon>>(
-        (viewModel) => viewModel.pokemonList);
     return NotificationListener<ScrollNotification>(
       onNotification: (scrollInfo) {
         if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
-          // load more
           context.read<MainViewModel>().fetchPokemonListMore();
         }
         return false;
       },
-      child: GridView.builder(
-        padding: const EdgeInsets.all(8.0),
-        itemCount: pokemonList.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 4.0,
-          crossAxisSpacing: 4.0,
-          childAspectRatio: 0.86,
+      child: Selector<MainViewModel, MainViewModel>(
+        shouldRebuild: (previous, next) => false,
+        selector: (context, viewModel) => viewModel,
+        builder: (context, viewModel, child) =>
+            Selector<MainViewModel, List<Pokemon>>(
+          shouldRebuild: (previous, next) => false,
+          selector: (context, viewModel) => viewModel.pokemonList,
+          builder: (context, pokemonList, child) => GridView.builder(
+            padding: const EdgeInsets.all(12.0),
+            itemCount: pokemonList.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12.0,
+              crossAxisSpacing: 12.0,
+              childAspectRatio: 0.86,
+            ),
+            itemBuilder: (context, index) {
+              return Selector<MainViewModel, Pokemon>(
+                selector: (context, viewModel) => viewModel.pokemonList[index],
+                builder: (context, pokemon, child) => _PokenmonItem(
+                  key: ValueKey(pokemon),
+                  viewModel: viewModel,
+                  pokemon: pokemon,
+                ),
+              );
+            },
+          ),
         ),
-        itemBuilder: (context, index) {
-          final pokemon = pokemonList[index];
-          return _PokenmonItem(
-            key: ValueKey(pokemon),
-            pokemon: pokemon,
-          );
-        },
       ),
     );
   }
 }
 
-class _PokenmonItem extends StatefulWidget {
-  _PokenmonItem({Key key, this.pokemon}) : super(key: key);
+class _PokenmonItem extends StatelessWidget {
+  _PokenmonItem({Key key, @required this.viewModel, @required this.pokemon})
+      : super(key: key);
 
+  final MainViewModel viewModel;
   final Pokemon pokemon;
-
-  @override
-  _PokenmonItemState createState() => _PokenmonItemState();
-}
-
-class _PokenmonItemState extends State<_PokenmonItem> {
-  Color _cardColor = Colors.grey;
-
-  _updateCardColor(Color color) {
-    if (mounted) {
-      setState(() {
-        _cardColor = color;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => DetailPage(pokemon: widget.pokemon)));
+            builder: (context) => DetailPage(pokemon: pokemon)));
       },
-      child: Card(
-        color: _cardColor,
+      child: Container(
+        decoration: BoxDecoration(
+          color: pokemon.color ?? Colors.grey,
+          borderRadius: BorderRadius.circular(12.0),
+        ),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 15.0),
               child: Hero(
-                tag: 'pokemon_${widget.pokemon.name}_imageUrl',
+                tag: 'pokemon_${pokemon.name}_imageUrl',
                 child: Image(
-                  image: CachedNetworkImageProvider(widget.pokemon.imageUrl),
+                  image: CachedNetworkImageProvider(pokemon.imageUrl),
                   width: 120.0,
                   height: 120.0,
-                )..listen(
-                    callback: (color) => _updateCardColor(color),
+                )..listenIf(
+                    check: (_) => pokemon.color == null,
+                    callback: (color) =>
+                        viewModel.updatePokemonColor(pokemon, color),
                   ),
               ),
             ),
             Hero(
-              tag: 'pokemon_${widget.pokemon.name}_name',
+              tag: 'pokemon_${pokemon.name}_name',
               child: Text(
-                widget.pokemon.name,
+                pokemon.name,
                 style: TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
@@ -171,5 +172,16 @@ class MainViewModel extends BaseViewModelWithLoadingState {
       _pokemonList += pokemonList;
     }
     notifyListeners();
+  }
+
+  updatePokemonColor(Pokemon pokemon, Color color) {
+    final index = _pokemonList.indexOf(pokemon);
+    if (index != -1) {
+      _pokemonList[index] = Pokemon(
+        name: pokemon.name,
+        url: pokemon.url,
+      )..color = color;
+      notifyListeners();
+    }
   }
 }
