@@ -64,7 +64,11 @@ class _MainBody extends StatelessWidget {
           childAspectRatio: 0.86,
         ),
         itemBuilder: (context, index) {
-          return _PokenmonItem(pokemon: pokemonList[index]);
+          final pokemon = pokemonList[index];
+          return _PokenmonItem(
+            key: ValueKey(pokemon),
+            pokemon: pokemon,
+          );
         },
       ),
     );
