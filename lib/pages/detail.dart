@@ -1,7 +1,5 @@
-import 'package:Pokedex/extensions/palette_image.dart';
 import 'package:Pokedex/base/view_model.dart';
 import 'package:Pokedex/constants/strings.dart';
-import 'package:Pokedex/main.dart';
 import 'package:Pokedex/models/pokemon.dart';
 import 'package:Pokedex/network/pokedex_client.dart';
 import 'package:Pokedex/utils/pokemon_type.dart';

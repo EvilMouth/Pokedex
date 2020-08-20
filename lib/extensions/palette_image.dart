@@ -6,9 +6,9 @@ extension PaletteImageListener on Image {
     PaletteGenerator paletteGenerator =
         await PaletteGenerator.fromImageProvider(
       image,
-      size: Size(width, height),
-      region: Offset.zero & Size(width, height),
-      maximumColorCount: 5,
+      // size: Size(width, height),
+      // region: Offset.zero & Size(width, height),
+      maximumColorCount: 1,
     );
     if (paletteGenerator != null && paletteGenerator.colors.isNotEmpty) {
       callback?.call(paletteGenerator.colors.first);
