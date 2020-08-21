@@ -93,16 +93,16 @@ class _PokenmonItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => DetailPage(pokemon: pokemon)));
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: pokemon.color ?? Colors.grey,
-          borderRadius: BorderRadius.circular(12.0),
-        ),
+    return Material(
+      color: pokemon.color ?? Colors.grey,
+      borderRadius: BorderRadius.circular(12.0),
+      child: InkWell(
+        splashColor: Colors.red,
+        borderRadius: BorderRadius.circular(12.0),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => DetailPage(pokemon: pokemon)));
+        },
         child: Column(
           children: [
             Container(
