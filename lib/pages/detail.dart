@@ -1,11 +1,58 @@
+import 'package:Pokedex/events/pokemon.dart';
+import 'package:Pokedex/extensions/palette_image.dart';
 import 'package:Pokedex/base/view_model.dart';
 import 'package:Pokedex/constants/strings.dart';
 import 'package:Pokedex/models/pokemon.dart';
 import 'package:Pokedex/network/pokedex_client.dart';
+import 'package:Pokedex/utils/bus.dart';
 import 'package:Pokedex/utils/pokemon_type.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+class _DetailViewModel extends BaseViewModelWithLoadingState {
+  final BuildContext context;
+
+  Pokemon _pokemon;
+  Pokemon get pokemon => _pokemon;
+  PokemonInfo _pokemonInfo;
+  PokemonInfo get pokemonInfo => _pokemonInfo;
+
+  _DetailViewModel(this.context, this._pokemon) {
+    _fetchPokemonInfo(pokemon.name);
+  }
+
+  _fetchPokemonInfo(String name) async {
+    markLoading(true);
+    PokedexClient.instance
+        .fetchPokemonInfo(name: name)
+        .then((pokemonInfo) => _updatePokemonInfo(pokemonInfo))
+        .catchError(
+          (err, stack) => Scaffold.of(context).showSnackBar(
+            SnackBar(
+              content: Text(err.toString()),
+            ),
+          ),
+        )
+        .whenComplete(() => markLoading(false));
+  }
+
+  _updatePokemonInfo(PokemonInfo pokemonInfo) {
+    _pokemonInfo = pokemonInfo;
+    notifyListeners();
+  }
+
+  updatePokemonColor(Color color) {
+    if (pokemon.color == color) return;
+    _pokemon = Pokemon(
+      name: pokemon.name,
+      url: pokemon.url,
+    )..color = color;
+    notifyListeners();
+    // notify main list
+    bus.fire(PokemonColorEvent(pokemon));
+  }
+}
 
 class DetailPage extends StatelessWidget {
   DetailPage({Key key, @required this.pokemon}) : super(key: key);
@@ -14,53 +61,76 @@ class DetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black,
-      child: ChangeNotifierProvider(
-        lazy: false,
-        create: (context) => DetailViewModel(pokemon),
-        child: Consumer<DetailViewModel>(
-          builder: (context, viewModel, child) => Stack(
-            children: [
-              Column(
-                children: [
-                  _DetailPokemonHeader(
-                    pokemon: viewModel.pokemon,
-                    pokemonInfo: viewModel.pokemonInfo,
-                  ),
-                  SizedBox(height: 12.0),
-                  Visibility(
-                    visible: viewModel.pokemonInfo != null,
-                    child: _DetailPokemonInfo(
-                      pokemonInfo: viewModel.pokemonInfo,
-                    ),
-                  ),
-                  SizedBox(height: 24.0),
-                  Visibility(
-                    visible: viewModel.pokemonInfo != null,
-                    child: _DetailPokemonStats(
-                      pokemonInfo: viewModel.pokemonInfo,
-                    ),
-                  ),
-                ],
-              ),
-              Visibility(
-                visible: viewModel.loading,
-                child: Center(child: CircularProgressIndicator()),
-              ),
-            ],
-          ),
+    return Scaffold(
+      body: Container(
+        color: Colors.black,
+        child: ChangeNotifierProvider(
+          create: (context) => _DetailViewModel(context, pokemon),
+          child: _DetailBody(),
         ),
       ),
     );
   }
 }
 
+class _DetailBody extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Selector<_DetailViewModel, _DetailViewModel>(
+          shouldRebuild: (previous, next) => false,
+          selector: (context, viewModel) => viewModel,
+          builder: (context, viewModel, child) =>
+              Selector<_DetailViewModel, PokemonInfo>(
+            selector: (context, viewModel) => viewModel.pokemonInfo,
+            builder: (context, pokemonInfo, child) => Column(
+              children: [
+                Selector<_DetailViewModel, Pokemon>(
+                  selector: (context, viewModel) => viewModel.pokemon,
+                  builder: (context, pokemon, child) => _DetailPokemonHeader(
+                    viewModel: viewModel,
+                    pokemon: pokemon,
+                    pokemonInfo: pokemonInfo,
+                  ),
+                ),
+                SizedBox(height: 12.0),
+                Visibility(
+                  visible: pokemonInfo != null,
+                  child: _DetailPokemonInfo(
+                    pokemonInfo: pokemonInfo,
+                  ),
+                ),
+                SizedBox(height: 24.0),
+                Visibility(
+                  visible: pokemonInfo != null,
+                  child: _DetailPokemonStats(
+                    pokemonInfo: pokemonInfo,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Visibility(
+          visible: context
+              .select<_DetailViewModel, bool>((viewModel) => viewModel.loading),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ],
+    );
+  }
+}
+
 class _DetailPokemonHeader extends StatelessWidget {
   _DetailPokemonHeader(
-      {Key key, @required this.pokemon, @required this.pokemonInfo})
+      {Key key,
+      @required this.viewModel,
+      @required this.pokemon,
+      @required this.pokemonInfo})
       : super(key: key);
 
+  final _DetailViewModel viewModel;
   final Pokemon pokemon;
   final PokemonInfo pokemonInfo;
 
@@ -77,56 +147,61 @@ class _DetailPokemonHeader extends StatelessWidget {
               bottomRight: Radius.circular(50.0),
             ),
           ),
-          child: Stack(
+          child: Column(
             children: [
-              Column(
-                children: [
-                  SizedBox(
-                    // status bar height
-                    height: MediaQuery.of(context).padding.top,
-                  ),
-                  Row(
+              // status bar height
+              SizedBox(height: MediaQuery.of(context).padding.top),
+              Expanded(
+                child: Stack(
+                  children: [
                     // tool bar
-                    children: [
-                      IconButton(
-                        color: Colors.white,
-                        icon: Icon(Icons.arrow_back),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                      Text(
-                        MyStrings.appName,
-                        style: TextStyle(
-                          fontSize: 18.0,
+                    Row(
+                      children: [
+                        IconButton(
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                          icon: Icon(Icons.arrow_back),
+                          onPressed: () => Navigator.of(context).pop(),
                         ),
-                      ),
-                      Spacer(),
-                      Text(
-                        pokemonInfo?.idString ?? '',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          MyStrings.appName,
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 16.0),
-                    ],
-                  ),
-                ],
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Hero(
-                    tag: 'pokemon_${pokemon.name}_imageUrl',
-                    child: Image(
-                      image: CachedNetworkImageProvider(pokemon.imageUrl),
-                      width: 190.0,
-                      height: 190.0,
+                        Spacer(),
+                        Text(
+                          pokemonInfo?.idString ?? '',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 16.0),
+                      ],
                     ),
-                  ),
+                    Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.only(top: 24.0),
+                      child: Hero(
+                        tag: 'pokemon_${pokemon.name}_imageUrl',
+                        child: CachedNetworkImage(
+                          imageUrl: pokemon.imageUrl,
+                          imageBuilder: (context, image) => Image(
+                            image: image,
+                            width: 190.0,
+                            height: 190.0,
+                          )..listenIf(
+                              check: (_) => pokemon.color == Colors.grey,
+                              callback: (color) =>
+                                  viewModel.updatePokemonColor(color),
+                            ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -309,7 +384,7 @@ class _DetailPokemonStats extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 35.0, //fixme
+            width: 35.0, //todo barrier
             child: Text(
               text,
               style: const TextStyle(
@@ -335,28 +410,5 @@ class _DetailPokemonStats extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class DetailViewModel extends BaseViewModelWithLoadingState {
-  final Pokemon pokemon;
-  PokemonInfo _pokemonInfo;
-  PokemonInfo get pokemonInfo => _pokemonInfo;
-
-  DetailViewModel(this.pokemon) {
-    _fetchPokemonInfo(pokemon.name);
-  }
-
-  _fetchPokemonInfo(String name) async {
-    markLoading(true);
-    final pokemonInfo =
-        await PokedexClient.instance.fetchPokemonInfo(name: name);
-    _updatePokemonInfo(pokemonInfo);
-    markLoading(false);
-  }
-
-  _updatePokemonInfo(PokemonInfo pokemonInfo) {
-    _pokemonInfo = pokemonInfo;
-    notifyListeners();
   }
 }
