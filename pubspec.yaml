@@ -41,6 +41,7 @@ dependencies:
   # utils
   intl: ^0.16.1
   palette_generator: ^0.2.3
+  logging: ^0.11.4
 
   # widgets
   cached_network_image: ^2.2.0+1

@@ -109,15 +109,20 @@ class _PokenmonItem extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 15.0),
               child: Hero(
                 tag: 'pokemon_${pokemon.name}_imageUrl',
-                child: Image(
-                  image: CachedNetworkImageProvider(pokemon.imageUrl),
+                child: CachedNetworkImage(
+                  imageUrl: pokemon.imageUrl,
                   width: 120.0,
                   height: 120.0,
-                )..listenIf(
-                    check: (_) => pokemon.color == null,
-                    callback: (color) =>
-                        viewModel.updatePokemonColor(pokemon, color),
-                  ),
+                  imageBuilder: (context, image) => Image(
+                    image: image,
+                    width: 120.0,
+                    height: 120.0,
+                  )..listenIf(
+                      check: (_) => pokemon.color == null,
+                      callback: (color) =>
+                          viewModel.updatePokemonColor(pokemon, color),
+                    ),
+                ),
               ),
             ),
             Hero(
