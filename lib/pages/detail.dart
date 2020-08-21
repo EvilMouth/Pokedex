@@ -19,24 +19,34 @@ class DetailPage extends StatelessWidget {
       child: ChangeNotifierProvider(
         lazy: false,
         create: (context) => DetailViewModel(pokemon),
-        child: Builder(
-          builder: (context) => Stack(
+        child: Consumer<DetailViewModel>(
+          builder: (context, viewModel, child) => Stack(
             children: [
               Column(
                 children: [
-                  _DetailPokemonHeader(),
+                  _DetailPokemonHeader(
+                    pokemon: viewModel.pokemon,
+                    pokemonInfo: viewModel.pokemonInfo,
+                  ),
                   SizedBox(height: 12.0),
-                  _DetailPokemonInfo(),
+                  Visibility(
+                    visible: viewModel.pokemonInfo != null,
+                    child: _DetailPokemonInfo(
+                      pokemonInfo: viewModel.pokemonInfo,
+                    ),
+                  ),
                   SizedBox(height: 24.0),
-                  _DetailPokemonStats(),
+                  Visibility(
+                    visible: viewModel.pokemonInfo != null,
+                    child: _DetailPokemonStats(
+                      pokemonInfo: viewModel.pokemonInfo,
+                    ),
+                  ),
                 ],
               ),
-              Center(
-                // show progress if loading
-                child: context.select<DetailViewModel, bool>(
-                        (viewModel) => viewModel.loading)
-                    ? CircularProgressIndicator()
-                    : null,
+              Visibility(
+                visible: viewModel.loading,
+                child: Center(child: CircularProgressIndicator()),
               ),
             ],
           ),
@@ -47,169 +57,173 @@ class DetailPage extends StatelessWidget {
 }
 
 class _DetailPokemonHeader extends StatelessWidget {
+  _DetailPokemonHeader(
+      {Key key, @required this.pokemon, @required this.pokemonInfo})
+      : super(key: key);
+
+  final Pokemon pokemon;
+  final PokemonInfo pokemonInfo;
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<DetailViewModel>(
-      builder: (context, viewModel, _) => Column(
-        children: [
-          Container(
-            height: 285.0,
-            decoration: BoxDecoration(
-              color: viewModel.pokemon.color ?? Colors.grey,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(50.0),
-                bottomRight: Radius.circular(50.0),
-              ),
+    return Column(
+      children: [
+        Container(
+          height: 285.0,
+          decoration: BoxDecoration(
+            color: pokemon.color ?? Colors.grey,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(50.0),
+              bottomRight: Radius.circular(50.0),
             ),
-            child: Stack(
-              children: [
-                Column(
-                  children: [
-                    SizedBox(
-                      // status bar height
-                      height: MediaQuery.of(context).padding.top,
-                    ),
-                    Row(
-                      // tool bar
-                      children: [
-                        IconButton(
-                          color: Colors.white,
-                          icon: Icon(Icons.arrow_back),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                        Text(
-                          MyStrings.appName,
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Spacer(),
-                        Text(
-                          viewModel.pokemonInfo?.idString ?? '',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(width: 16.0),
-                      ],
-                    ),
-                  ],
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Hero(
-                      tag: 'pokemon_${viewModel.pokemon.name}_imageUrl',
-                      child: Image(
-                        image: CachedNetworkImageProvider(
-                            viewModel.pokemon.imageUrl),
-                        width: 190.0,
-                        height: 190.0,
+          ),
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  SizedBox(
+                    // status bar height
+                    height: MediaQuery.of(context).padding.top,
+                  ),
+                  Row(
+                    // tool bar
+                    children: [
+                      IconButton(
+                        color: Colors.white,
+                        icon: Icon(Icons.arrow_back),
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
+                      Text(
+                        MyStrings.appName,
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Spacer(),
+                      Text(
+                        pokemonInfo?.idString ?? '',
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 16.0),
+                    ],
+                  ),
+                ],
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Hero(
+                    tag: 'pokemon_${pokemon.name}_imageUrl',
+                    child: Image(
+                      image: CachedNetworkImageProvider(pokemon.imageUrl),
+                      width: 190.0,
+                      height: 190.0,
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          SizedBox(height: 29.0),
-          Hero(
-            flightShuttleBuilder: (_, __, ___, ____, to) => DefaultTextStyle(
-              style: DefaultTextStyle.of(to).style,
-              softWrap: false,
-              overflow: TextOverflow.visible,
-              child: to.widget,
-            ),
-            tag: 'pokemon_${viewModel.pokemon.name}_name',
-            child: Text(
-              viewModel.pokemon.name,
-              style: TextStyle(
-                fontSize: 36.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
               ),
+            ],
+          ),
+        ),
+        SizedBox(height: 29.0),
+        Hero(
+          flightShuttleBuilder: (_, __, ___, ____, to) => DefaultTextStyle(
+            style: DefaultTextStyle.of(to).style,
+            softWrap: false,
+            overflow: TextOverflow.visible,
+            child: to.widget,
+          ),
+          tag: 'pokemon_${pokemon.name}_name',
+          child: Text(
+            pokemon.name,
+            style: TextStyle(
+              fontSize: 36.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
 class _DetailPokemonInfo extends StatelessWidget {
+  _DetailPokemonInfo({Key key, @required this.pokemonInfo}) : super(key: key);
+
+  final PokemonInfo pokemonInfo;
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<DetailViewModel>(
-      builder: (context, viewModel, _) => viewModel.pokemonInfo == null
-          ? Container()
-          : Container(
-              padding: const EdgeInsets.only(left: 32.0, right: 32.0),
-              child: Column(
-                children: [
-                  Wrap(
-                    spacing: 20.0,
-                    runSpacing: 10.0,
-                    children: viewModel.pokemonInfo.types
-                            ?.map<Widget>(
-                                (type) => _buildPokemonTypeCard(type.type.name))
-                            ?.toList() ??
-                        [],
-                  ),
-                  SizedBox(height: 35.0),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Text(
-                              viewModel.pokemonInfo.weightString,
-                              style: const TextStyle(
-                                fontSize: 21.0,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 10.0),
-                            Text(
-                              MyStrings.weight,
-                              style: const TextStyle(
-                                color: Colors.white54,
-                              ),
-                            ),
-                          ],
-                        ),
+    return Container(
+      padding: const EdgeInsets.only(left: 32.0, right: 32.0),
+      child: Column(
+        children: [
+          Wrap(
+            spacing: 20.0,
+            runSpacing: 10.0,
+            children: pokemonInfo.types
+                    ?.map<Widget>(
+                        (type) => _buildPokemonTypeCard(type.type.name))
+                    ?.toList() ??
+                [],
+          ),
+          SizedBox(height: 35.0),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      pokemonInfo.weightString,
+                      style: const TextStyle(
+                        fontSize: 21.0,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Text(
-                              viewModel.pokemonInfo.heightString,
-                              style: const TextStyle(
-                                fontSize: 21.0,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 10.0),
-                            Text(
-                              MyStrings.height,
-                              style: const TextStyle(
-                                color: Colors.white54,
-                              ),
-                            ),
-                          ],
-                        ),
+                    ),
+                    SizedBox(height: 10.0),
+                    Text(
+                      MyStrings.weight,
+                      style: const TextStyle(
+                        color: Colors.white54,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      pokemonInfo.heightString,
+                      style: const TextStyle(
+                        fontSize: 21.0,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10.0),
+                    Text(
+                      MyStrings.height,
+                      style: const TextStyle(
+                        color: Colors.white54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -233,59 +247,55 @@ class _DetailPokemonInfo extends StatelessWidget {
 }
 
 class _DetailPokemonStats extends StatelessWidget {
+  _DetailPokemonStats({Key key, @required this.pokemonInfo}) : super(key: key);
+
+  final PokemonInfo pokemonInfo;
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<DetailViewModel>(
-      builder: (context, viewModel, _) => viewModel.pokemonInfo == null
-          ? Container()
-          : Container(
-              child: Column(
-                children: [
-                  Text(
-                    'Base Stats',
-                    style: const TextStyle(
-                      fontSize: 21.0,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 16.0),
-                  _buildPokemonStatsBar(
-                    text: MyStrings.hp,
-                    color: Colors.red,
-                    progress: viewModel.pokemonInfo.hp / PokemonInfo.maxHp,
-                  ),
-                  SizedBox(height: 16.0),
-                  _buildPokemonStatsBar(
-                    text: MyStrings.atk,
-                    color: Colors.yellow,
-                    progress:
-                        viewModel.pokemonInfo.attack / PokemonInfo.maxAttack,
-                  ),
-                  SizedBox(height: 16.0),
-                  _buildPokemonStatsBar(
-                    text: MyStrings.def,
-                    color: Colors.blue,
-                    progress:
-                        viewModel.pokemonInfo.defense / PokemonInfo.maxDefense,
-                  ),
-                  SizedBox(height: 16.0),
-                  _buildPokemonStatsBar(
-                    text: MyStrings.spd,
-                    color: Colors.blue[100],
-                    progress:
-                        viewModel.pokemonInfo.speed / PokemonInfo.maxSpeed,
-                  ),
-                  SizedBox(height: 16.0),
-                  _buildPokemonStatsBar(
-                    text: MyStrings.exp,
-                    color: Colors.green,
-                    progress:
-                        viewModel.pokemonInfo.experience / PokemonInfo.maxExp,
-                  ),
-                ],
-              ),
+    return Container(
+      child: Column(
+        children: [
+          Text(
+            'Base Stats',
+            style: const TextStyle(
+              fontSize: 21.0,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
             ),
+          ),
+          SizedBox(height: 16.0),
+          _buildPokemonStatsBar(
+            text: MyStrings.hp,
+            color: Colors.red,
+            progress: pokemonInfo.hp / PokemonInfo.maxHp,
+          ),
+          SizedBox(height: 16.0),
+          _buildPokemonStatsBar(
+            text: MyStrings.atk,
+            color: Colors.yellow,
+            progress: pokemonInfo.attack / PokemonInfo.maxAttack,
+          ),
+          SizedBox(height: 16.0),
+          _buildPokemonStatsBar(
+            text: MyStrings.def,
+            color: Colors.blue,
+            progress: pokemonInfo.defense / PokemonInfo.maxDefense,
+          ),
+          SizedBox(height: 16.0),
+          _buildPokemonStatsBar(
+            text: MyStrings.spd,
+            color: Colors.blue[100],
+            progress: pokemonInfo.speed / PokemonInfo.maxSpeed,
+          ),
+          SizedBox(height: 16.0),
+          _buildPokemonStatsBar(
+            text: MyStrings.exp,
+            color: Colors.green,
+            progress: pokemonInfo.experience / PokemonInfo.maxExp,
+          ),
+        ],
+      ),
     );
   }
 

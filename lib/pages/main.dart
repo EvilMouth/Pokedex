@@ -31,12 +31,11 @@ class _MainBody extends StatelessWidget {
       child: Stack(
         children: [
           _buildPokemonList(context),
-          Center(
+          Visibility(
             // just observe loading state by using select
-            child: context.select<MainViewModel, bool>(
-                    (viewModel) => viewModel.loading)
-                ? CircularProgressIndicator()
-                : null,
+            visible: context
+                .select<MainViewModel, bool>((viewModel) => viewModel.loading),
+            child: Center(child: CircularProgressIndicator()),
           ),
         ],
       ),
