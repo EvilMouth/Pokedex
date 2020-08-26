@@ -109,7 +109,6 @@ class MainPage extends StatelessWidget {
         selector: (context, viewModel) => viewModel,
         builder: (context, viewModel, child) =>
             Selector<MainViewModel, List<Pokemon>>(
-          shouldRebuild: (previous, next) => false,
           selector: (context, viewModel) => viewModel.pokemonList,
           builder: (context, pokemonList, child) => GridView.builder(
             padding: const EdgeInsets.all(12.0),
