@@ -112,10 +112,12 @@ class _DetailBody extends StatelessWidget {
             ),
           ),
         ),
-        Visibility(
-          visible: context
-              .select<_DetailViewModel, bool>((viewModel) => viewModel.loading),
-          child: Center(child: CircularProgressIndicator()),
+        Builder(
+          builder: (context) => Visibility(
+            visible: context.select<_DetailViewModel, bool>(
+                (viewModel) => viewModel.loading),
+            child: Center(child: CircularProgressIndicator()),
+          ),
         ),
       ],
     );

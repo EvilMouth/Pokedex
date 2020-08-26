@@ -84,11 +84,13 @@ class MainPage extends StatelessWidget {
             child: _buildPokemonList(context),
           ),
         ),
-        Visibility(
-          // just observe loading state by using select
-          visible: context
-              .select<MainViewModel, bool>((viewModel) => viewModel.loading),
-          child: Center(child: CircularProgressIndicator()),
+        Builder(
+          builder: (context) => Visibility(
+            // just observe loading state by using select
+            visible: context
+                .select<MainViewModel, bool>((viewModel) => viewModel.loading),
+            child: Center(child: CircularProgressIndicator()),
+          ),
         ),
       ],
     );
@@ -122,6 +124,7 @@ class MainPage extends StatelessWidget {
               return Selector<MainViewModel, Pokemon>(
                 selector: (context, viewModel) => viewModel.pokemonList[index],
                 builder: (context, pokemon, child) => _PokenmonItem(
+                  key: ValueKey(pokemon.name),
                   viewModel: viewModel,
                   pokemon: pokemon,
                 ),
@@ -156,24 +159,26 @@ class _PokenmonItem extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
-              child: AspectRatio(
-                aspectRatio: 1 / 1,
-                child: Hero(
-                  tag: 'pokemon_${pokemon.name}_imageUrl',
-                  child: CachedNetworkImage(
-                    imageUrl: pokemon.imageUrl,
-                    imageBuilder: (context, image) => Image(
-                      image: image,
-                      width: 122.0, //todo size issue
-                      height: 122.0,
-                    )..listenIf(
-                        check: (_) => pokemon.color == null,
-                        callback: (color) =>
-                            viewModel.updatePokemonColor(pokemon, color),
-                        fallback: Colors.grey,
-                      ),
+            RepaintBoundary(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
+                child: AspectRatio(
+                  aspectRatio: 1 / 1,
+                  child: Hero(
+                    tag: 'pokemon_${pokemon.name}_imageUrl',
+                    child: CachedNetworkImage(
+                      imageUrl: pokemon.imageUrl,
+                      imageBuilder: (context, image) => Image(
+                        image: image,
+                        width: 122.0, //todo size issue
+                        height: 122.0,
+                      )..listenIf(
+                          check: (_) => pokemon.color == null,
+                          callback: (color) =>
+                              viewModel.updatePokemonColor(pokemon, color),
+                          fallback: Colors.grey,
+                        ),
+                    ),
                   ),
                 ),
               ),
